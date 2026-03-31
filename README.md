@@ -4,7 +4,7 @@
 
 ---
 
-🌐 **Live Demo:** *(Add your deployed link here)*
+🌐 **Live Demo:** *(https://sensai-wheat.vercel.app/)*
 
 SensAI is a **production-ready AI-powered student preparation platform** designed to help students become industry-ready. It combines **AI tools, real-time insights, and performance analytics** into one unified experience.
 
