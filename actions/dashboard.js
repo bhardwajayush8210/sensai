@@ -1,7 +1,7 @@
 "use server";
-
 import { db } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 
 export const generateAIInsights = async (industry) => {
   const prompt = `
@@ -17,7 +17,6 @@ Analyze the current state of the ${industry} industry and provide insights in ON
   "keyTrends": ["trend1", "trend2"],
   "recommendedSkills": ["skill1", "skill2"]
 }
-
 IMPORTANT:
 - Return ONLY valid JSON
 - No markdown, no explanation
@@ -42,14 +41,12 @@ IMPORTANT:
             content: prompt,
           },
         ],
-      }), // ✅ FIXED HERE
-    },
+      }),
+    }
   );
 
   const data = await response.json();
-
   const text = data.choices?.[0]?.message?.content || "";
-
   const cleanedText = text.replace(/```json|```/g, "").trim();
 
   try {
@@ -62,7 +59,6 @@ IMPORTANT:
 
 export async function getIndustryInsights() {
   const { userId } = await auth();
-
   if (!userId) throw new Error("Unauthorized");
 
   const user = await db.user.findUnique({
@@ -74,8 +70,14 @@ export async function getIndustryInsights() {
 
   if (!user) throw new Error("User not found");
 
+  if (!user.industry) {
+    redirect("/onboarding");
+  }
+
   if (!user.industryInsight) {
     const insights = await generateAIInsights(user.industry);
+
+    if (!insights) throw new Error("Failed to generate insights");
 
     const industryInsight = await db.industryInsight.create({
       data: {
